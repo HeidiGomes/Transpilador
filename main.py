@@ -116,6 +116,7 @@ def p_bloco(p):
     '''
     bloco : OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
           | OP_PRIO_ABRE_CHAVES impressao OP_PRIO_FECHA_CHAVES
+          | OP_PRIO_ABRE_CHAVES impressao expr OP_PRIO_FECHA_CHAVES
           
     '''
 
@@ -190,6 +191,7 @@ def p_escrita(p):
 def p_expressao_variavel(p):
     '''
     expr :  VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_ADICAO INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
     '''
 
 def p_expressao_operacao(p):
