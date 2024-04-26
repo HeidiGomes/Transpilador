@@ -1,3 +1,8 @@
 PRINTF("O valor de x eh: ", x);
 
 x = 10;
+
+x = 10;
+{
+    PRINTF("O valor de x eh: ", x);
+}
