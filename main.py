@@ -107,9 +107,15 @@ def p_declaracoes(p):
     declaracoes : declaracao
     '''
 
+def p_declaracoes_mult(p):
+    '''
+    declaracoes :  declaracao bloco
+    '''
+
 def p_bloco(p):
     '''
     bloco : OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
+          | OP_PRIO_ABRE_CHAVES impressao OP_PRIO_FECHA_CHAVES
           
     '''
 
@@ -149,7 +155,6 @@ def p_declaracao_funcao_invocada(p):
     declaracao : funcao OP_FINAL_LINHA_PONTO_VIRGULA
                | impressao
                | escrita
-               | 
     '''
 
 def p_declaracao_definir_funcao(p):
