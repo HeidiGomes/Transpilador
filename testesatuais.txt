@@ -1,0 +1,3 @@
+PRINTF("O valor de x eh: ", x);
+
+x = 10;

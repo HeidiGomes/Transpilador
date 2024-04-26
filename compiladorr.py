@@ -1,197 +1,210 @@
-import re
+import tkinter as tk
+from tkinter import ttk
+import ply.lex as lex
+import ply.yacc as yacc
 
-# Definição dos padrões regulares para os tokens
-patterns = [
-    ('PROGRAMA', r'programa'),
-    ('FIMPROG', r'fimprog'),
-    ('TIPO', r'(inteiro|decimal|caractere)'),
-    ('LEIA', r'leia'),
-    ('ESCREVA', r'escreva'),
-    ('ABRE_CHAVE', r'\{'),
-    ('FECHA_CHAVE', r'\}'),
-    ('OPERADOR', r'\+|-|\*|/|>|>=|<|<=|==|!='),
-    ('ABRE_PAR', r'\('),
-    ('FECHA_PAR', r'\)'),
-    ('VIRGULA', r','),
-    ('IGUAL', r':='),
-    ('PONTO_VIRGULA', r';'),
-    ('IDENTIFICADOR', r'[a-zA-Z][a-zA-Z0-9]*'),
-    ('NUMERO', r'\d+(\.\d+)?'),
-    ('TEXTO', r'"[^"]*"'),
-    ('COMENTARIO', r'//.*'),
-    ('ESPACO', r'\s+'),
-    ('NOVA_LINHA', r'\n')
+# Lista de tokens
+tokens = [
+    'ID',
+    'INTEGER',
+    'STRING',
+    'IF',
+    'ELSE',
+    'WHILE',
+    'FOR',
+    'DOUBLE',
+    'READ',
+    'WRITE',
+    'RETURN',
+    'OP_PRIO_ABRE_PARENTESES',
+    'OP_PRIO_FECHA_PARENTESES',
+    'OP_PRIO_ABRE_CHAVES',
+    'OP_PRIO_FECHA_CHAVES',
+    'OP_ATRIBUICAO',
+    'SEMICOLON',
 ]
 
-# Função para identificar o próximo token no código fonte
-def lexer(code):
-    tokens = []
-    while code:
-        match = None
-        for token_type, pattern in patterns:
-            regex = re.compile(pattern)
-            match = regex.match(code)
-            if match:
-                value = match.group(0)
-                if token_type != 'ESPACO' and token_type != 'NOVA_LINHA' and token_type != 'COMENTARIO':
-                    tokens.append((token_type, value))
-                code = code[match.end():]
+# Palavras reservadas
+reserved = {
+    'se': 'IF',
+    'senao': 'ELSE',
+    'enquanto': 'WHILE',
+    'para': 'FOR',
+    'leia': 'READ',
+    'escreva': 'WRITE',
+    'retorne': 'RETURN',
+    'inteiro': 'INTEGER',
+    'double': 'DOUBLE',
+    'booleano': 'BOOLEAN'
+}
+
+# Expressões regulares para tokens simples
+t_OP_PRIO_ABRE_PARENTESES = r'\('
+t_OP_PRIO_FECHA_PARENTESES = r'\)'
+t_OP_PRIO_ABRE_CHAVES = r'\{'
+t_OP_PRIO_FECHA_CHAVES = r'\}'
+t_OP_ATRIBUICAO = r'='
+t_SEMICOLON = r';'
+
+# Ignorar caracteres em branco
+t_ignore = ' \t'
+
+# Tratar quebra de linha
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+
+# Tratar identificadores e palavras reservadas
+def t_ID(t):
+    r'[a-zA-Z_][a-zA-Z0-9_]*'
+    t.type = reserved.get(t.value, 'ID')  # Verifica se é uma palavra reservada
+    return t
+
+# Tratar números inteiros
+def t_INTEGER(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
+
+# Tratar strings delimitadas por aspas duplas
+def t_STRING(t):
+    r'\"([^\\\n]|(\\.))*?\"'
+    t.value = t.value[1:-1]  # Remove as aspas duplas
+    return t
+
+# Tratar erros léxicos
+def t_error(t):
+    print(f"Illegal character '{t.value[0]}'")
+    t.lexer.skip(1)
+
+# Construir o lexer
+lexer = lex.lex()
+
+# Definição das regras de parsing
+
+def p_programa(p):
+    '''programa : declaracoes funcoes principal'''
+
+def p_declaracoes(p):
+    '''declaracoes : declaracoes declaracao
+                   |'''
+
+def p_declaracao(p):
+    '''declaracao : tipo ID SEMICOLON
+                  | tipo ID OP_ATRIBUICAO expressao SEMICOLON'''
+
+def p_tipo(p):
+    '''tipo : INTEGER
+            | DOUBLE
+            | STRING'''
+
+def p_funcoes(p):
+    '''funcoes : funcoes funcao
+               |'''
+
+def p_funcao(p):
+    '''funcao : ID OP_PRIO_ABRE_PARENTESES parametros OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes comandos OP_PRIO_FECHA_CHAVES'''
+
+def p_parametros(p):
+    '''parametros : parametro
+                  |'''
+
+def p_parametro(p):
+    '''parametro : tipo ID'''
+
+def p_principal(p):
+    '''principal : ID OP_PRIO_ABRE_PARENTESES parametros OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES'''
+
+def p_comandos(p):
+    '''comandos : comandos comando
+                |'''
+
+def p_comando(p):
+    '''comando : atribuicao
+               | condicional
+               | repeticao
+               | entrada_saida
+               | RETURN SEMICOLON'''
+
+def p_atribuicao(p):
+    '''atribuicao : ID OP_ATRIBUICAO expressao SEMICOLON'''
+
+def p_condicional(p):
+    '''condicional : IF OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES ELSE OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES'''
+
+def p_repeticao(p):
+    '''repeticao : WHILE OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES
+                 | FOR OP_PRIO_ABRE_PARENTESES atribuicao SEMICOLON expressao SEMICOLON atribuicao OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES'''
+
+def p_entrada_saida(p):
+    '''entrada_saida : WRITE OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES SEMICOLON
+                     | READ OP_PRIO_ABRE_PARENTESES ID OP_PRIO_FECHA_PARENTESES SEMICOLON'''
+
+def p_expressao(p):
+    '''expressao : termo OP_ATRIBUICAO termo
+                 | termo'''
+
+def p_termo(p):
+    '''termo : fator'''
+
+def p_fator(p):
+    '''fator : ID
+             | INTEGER
+             | STRING
+             | OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES'''
+
+# Construir o parser
+parser = yacc.yacc()
+
+class Application():
+    def __init__(self, root):
+        self.root = root
+        self.tela()
+        self.frames_da_tela()
+        self.botoes()
+        root.mainloop()
+
+    def tela(self):
+        self.root.title("Analisador Léxico e Sintático")
+        self.root.configure(background="white")
+        self.root.geometry("700x500")
+        self.root.resizable(True, True)
+        self.root.minsize(width=550, height=350)
+
+    def frames_da_tela(self):
+        self.frame_1 = tk.Frame(self.root, bd=4, bg="#DCDCDC", highlightbackground="grey", highlightthickness=3)
+        self.frame_1.place(relx=0.02, rely=0.07, relwidth=0.96, relheight=0.75)
+
+        self.codigo_entry = tk.Text(self.frame_1)
+        self.codigo_entry.place(relx=0.001, rely=0.001, relwidth=0.995, relheight=0.995)
+
+        self.scroll_bar = ttk.Scrollbar(self.frame_1, orient='vertical', command=self.codigo_entry.yview)
+        self.scroll_bar.place(relx=0.982, rely=0.0019, relwidth=0.015, relheight=0.99)
+        self.codigo_entry['yscrollcommand'] = self.scroll_bar
+
+    def limpa_telaentrada(self):
+        self.codigo_entry.delete(1.0, tk.END)
+
+    def botoes(self):
+        self.bt_limpar = tk.Button(text="Limpar", bd=2, bg="#FF6347", font=('', 11), command=self.limpa_telaentrada)
+        self.bt_limpar.place(relx=0.74, rely=0.92, relwidth=0.1, relheight=0.05)
+
+        self.bt_executar = tk.Button(text="Executar", bd=2, bg="lightgreen", font=('', 11), command=self.chama_analisador)
+        self.bt_executar.place(relx=0.85, rely=0.92, relwidth=0.1, relheight=0.05)
+
+    def chama_analisador(self):
+        data = self.codigo_entry.get(1.0, "end-1c")
+        lexer = lex.lex()
+        lexer.input(data)
+        while True:
+            tok = lexer.token()
+            if not tok:
                 break
-        if not match:
-            print('Caractere inválido:', code[0])
-            raise ValueError('Caractere inválido: ' + code[0])
-    return tokens
+            print(tok)
 
-# Função para gerar código equivalente em Python
-def gerar_codigo_python(tokens):
-    codigo_python = ""
+        parser = yacc.yacc()
+        parser.parse(data)
 
-    # Função para consumir o próximo token
-    def consumir(tipo_esperado):
-        nonlocal tokens
-        if tokens[0][0] == tipo_esperado:
-            return tokens.pop(0)[1]
-        else:
-            raise SyntaxError(f'Erro de sintaxe: esperado {tipo_esperado}, encontrado {tokens[0][0]}')
 
-    # Função para a regra do programa
-    def programa():
-        nonlocal codigo_python
-        print("Iniciando a análise do programa...")
-        consumir('PROGRAMA')
-        declaracoes()
-        bloco()
-        consumir('FIMPROG')
-
-    # Função para a regra das declarações
-    def declaracoes():
-        nonlocal codigo_python
-        print("Iniciando a análise das declarações...")
-        while tokens[0][0] == 'TIPO':
-            consumir('TIPO')
-            variaveis = []
-            while tokens[0][0] == 'IDENTIFICADOR':
-                variavel = consumir('IDENTIFICADOR')
-                variaveis.append(variavel)
-                if tokens[0][0] == 'VIRGULA':
-                    consumir('VIRGULA')
-            consumir('PONTO_VIRGULA')
-            for variavel in variaveis:
-                codigo_python += f'{variavel} = 0\n'
-
-    # Função para a regra do bloco
-    def bloco():
-        nonlocal codigo_python
-        print("Iniciando a análise do bloco...")
-        consumir('ABRE_CHAVE')
-        comandos()
-        consumir('FECHA_CHAVE')
-
-    # Função para a regra dos comandos
-    def comandos():
-        nonlocal codigo_python
-        print("Iniciando a análise dos comandos...")
-        while tokens[0][0] != 'FECHA_CHAVE':
-            comando()
-
-    def comando():
-        nonlocal codigo_python
-        print("Iniciando a análise do comando...")
-        if tokens[0][0] == 'LEIA':
-            consumir('LEIA')
-            consumir('ABRE_PAR')
-            identificador = consumir('IDENTIFICADOR')
-            consumir('FECHA_PAR')
-            consumir('PONTO_VIRGULA')
-            codigo_python += f'{identificador} = int(input("Digite o valor de {identificador}: "))\n'
-        elif tokens[0][0] == 'ESCREVA':
-            consumir('ESCREVA')
-            consumir('ABRE_PAR')
-            if tokens[0][0] == 'TEXTO':
-                texto = consumir('TEXTO')
-                consumir('FECHA_PAR')
-                consumir('PONTO_VIRGULA')
-                codigo_python += f'print({texto})\n'
-            elif tokens[0][0] == 'IDENTIFICADOR':
-                identificador = consumir('IDENTIFICADOR')
-                consumir('FECHA_PAR')
-                consumir('PONTO_VIRGULA')
-                codigo_python += f'print("{identificador} =", {identificador})\n'
-        else:
-            atribuicao()
-
-    # Função para a regra da atribuição
-    def atribuicao():
-        nonlocal codigo_python
-        identificador = consumir('IDENTIFICADOR')
-        operador = consumir('IGUAL')
-        valor = expressao()
-        consumir('PONTO_VIRGULA')
-        codigo_python += f'{identificador} = {valor}\n'
-
-    # Função para a regra da expressão
-    def expressao():
-        nonlocal codigo_python
-        valor = termo()
-        while tokens[0][0] in ['OPERADOR', 'IDENTIFICADOR', 'NUMERO', 'ABRE_PAR']:
-            operador = consumir('OPERADOR')
-            proximo_valor = termo()
-            valor = f'({valor} {operador} {proximo_valor})'
-        return valor
-
-    # Função para a regra do termo
-    def termo():
-        nonlocal codigo_python
-        valor = fator()
-        while tokens[0][0] in ['OPERADOR', 'IDENTIFICADOR', 'NUMERO', 'ABRE_PAR']:
-            operador = consumir('OPERADOR')
-            proximo_valor = fator()
-            valor = f'({valor} {operador} {proximo_valor})'
-        return valor
-
-    # Função para a regra do fator
-    def fator():
-        nonlocal codigo_python
-        if tokens[0][0] == 'IDENTIFICADOR':
-            return consumir('IDENTIFICADOR')
-        elif tokens[0][0] == 'NUMERO':
-            return consumir('NUMERO')
-        elif tokens[0][0] == 'ABRE_PAR':
-            consumir('ABRE_PAR')
-            valor = expressao()
-            consumir('FECHA_PAR')
-            return valor
-        else:
-            raise SyntaxError(f'Erro de sintaxe: fator inesperado {tokens[0][0]}')
-
-    # Chamada da regra inicial
-    programa()
-
-    return codigo_python
-
-# Ler o código fonte
-with open('codigo_fonte.txt', 'r') as file:
-    codigo_fonte = file.read()
-
-# Realizar a análise léxica
-tokens = lexer(codigo_fonte)
-print(tokens)
-
-# Tentar fazer a análise sintática
-try:
-    codigo_python = gerar_codigo_python(tokens)
-    print('Análise sintática concluída sem erros.')
-
-    # Verificar se há código Python gerado
-    if codigo_python:
-        # Se a análise sintática estiver correta e houver código Python gerado,
-        # salve-o no arquivo "codigo_python.txt"
-        with open('codigo_python.txt', 'w') as file:
-            file.write(codigo_python)
-
-        print('Código Python gerado com sucesso e salvo no arquivo "codigo_python.txt".')
-    else:
-        print('Nenhum código Python foi gerado.')
-
-except SyntaxError as e:
-    print('Erro de sintaxe:', e)
+root = tk.Tk()
+Application(root)

@@ -1,0 +1,4 @@
+WHILE (x < 10) {
+    PRINTF("O valor de x eh: ", x);
+    x = x + 1;
+}

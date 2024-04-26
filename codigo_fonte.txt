@@ -1,11 +1,13 @@
 programa
-inteiro a, b, media;
+inteiro num1, num2, soma;
+decimal media;
 {
     escreva("Digite o primeiro número: ");
-    leia(a);
+    leia(num1);
     escreva("Digite o segundo número: ");
-    leia(b);
-    media := (a + b) / 2;
+    leia(num2);
+    soma := num1 + num2;
+    media := soma / 2;
     escreva("A média é: ");
     escreva(media);
 }

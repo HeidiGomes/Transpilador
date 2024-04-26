@@ -1,0 +1,55 @@
+programa : declaracoes funcoes principal
+
+declaracoes : declaracoes declaracao
+            | declaracao
+            |
+
+declaracao : tipo ID OP_ATRIBUICAO expressao OP_FINALLINHA
+
+tipo : INTEIRO
+     | DOUBLE
+     | STRING
+
+funcoes : funcoes funcao
+        | funcao
+        |
+
+funcao : ID OP_PRIO_ABRE_PARENTESES parametros OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes comandos OP_PRIO_FECHA_CHAVES
+
+parametros : parametro
+           | parametro OP_EXEC_VIRGULA parametros
+
+parametro : tipo ID
+
+principal : ID OP_PRIO_ABRE_PARENTESES parametros OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES
+
+comandos : comandos comando
+         | comando
+
+comando : atribuicao
+        | condicional
+        | repeticao
+        | entrada_saida
+
+atribuicao : ID OP_ATRIBUICAO expressao OP_FINALLINHA
+
+condicional : IF OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES
+            | IF OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES ELSE OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES
+
+repeticao : WHILE OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES
+          | FOR OP_PRIO_ABRE_PARENTESES atribuicao OP_FINALLINHA expressao OP_FINALLINHA atribuicao OP_FINALLINHA OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES comandos OP_PRIO_FECHA_CHAVES
+
+entrada_saida : IMP OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES OP_FINALLINHA
+              | SCANF OP_PRIO_ABRE_PARENTESES ID OP_PRIO_FECHA_PARENTESES OP_FINALLINHA
+
+expressao : expressao OP_MAT_MAIS termo
+          | expressao OP_MAT_MENOS termo
+          | termo
+
+termo : termo OP_MAT_VEZES fator
+      | termo OP_MAT_DIVIDE fator
+      | fator
+
+fator : ID
+      | NUMERO
+      | OP_PRIO_ABRE_PARENTESES expressao OP_PRIO_FECHA_PARENTESES

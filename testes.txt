@@ -26,3 +26,16 @@ inteiro a, b, media;
     escreva(media);
 }
 fimprog;
+
+programa
+inteiro resultado;
+{
+    resultado := (2 + 2) - 2 * (4 + 4);
+    escreva("O resultado é: ");
+    escreva(resultado);
+}
+fimprog;
+
+integer x;
+x = 10;
+write(x);
