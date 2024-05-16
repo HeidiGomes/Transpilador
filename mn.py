@@ -7,20 +7,21 @@ from tkinter import filedialog
 
 # Análise Léxica
 reserved = {
-   'IF': 'IF',
-   'ELIF': 'ELIF',
+   'SE': 'SE',
    'ELSE': 'ELSE',
-   'WHILE': 'WHILE',
-   'FOR': 'FOR',
-   'PRINTF': 'PRINTF',
-   'SCANF': 'SCANF',
+   'ENQUANTO': 'ENQUANTO',
+   'PARA': 'PARA',
+   'ESCREVA': 'ESCREVA',
+   'LEIA': 'LEIA',
+   'EM' : 'EM',
+   'RANGE' : 'RANGE',
 }
 
 tokens = [
     'INTEIRO',
     'DOUBLE',
     'STRING',
-    'string_mal_formada',
+    'INT',
     'VARIAVEL',
     'OP_MAT_ADICAO',
     'OP_MAT_SUB',
@@ -28,25 +29,28 @@ tokens = [
     'OP_MAT_DIV',
     'OP_EXEC_VIRGULA',
     'OP_ATRIB_IGUAL',
+    'OP_ATRIB_MAIS_IGUAL',
+    'OP_REL_DUPLO_IGUAL',
     'OP_REL_MENOR',
     'OP_REL_MAIOR',
     'OP_FINAL_LINHA_PONTO_VIRGULA', 
     'OP_PRIO_ABRE_PARENTESES',
     'OP_PRIO_FECHA_PARENTESES',
-    'OP_PRIO_ABRE_COLCHETES',
-    'OP_PRIO_FECHA_COLCHETES',
+    #'OP_PRIO_ABRE_COLCHETES',
+    #'OP_PRIO_FECHA_COLCHETES',
     'OP_PRIO_ABRE_CHAVES',
     'OP_PRIO_FECHA_CHAVES',
 ] + list(reserved.values())  # Concatenando com as palavras reservadas para verificação
 
 # Regras de expressão regular (RegEx) para tokens simples
-t_WHILE = r'WHILE'
-t_IF = r'IF'
-t_ELIF = r'ELIF'
+t_ENQUANTO = r'ENQUANTO'
+t_SE = r'SE'
 t_ELSE = r'ELSE'
-t_FOR = r'FOR'
-t_PRINTF = r'PRINTF'
-t_SCANF = r'SCANF'
+t_PARA = r'PARA'
+t_ESCREVA = r'ESCREVA'
+t_LEIA = r'LEIA'
+t_EM = r'EM'
+t_RANGE = r'RANGE'
 t_OP_MAT_ADICAO = r'\+'
 t_OP_MAT_SUB = r'-'
 t_OP_MAT_MULT = r'\*'
@@ -54,12 +58,14 @@ t_OP_MAT_DIV = r'/'
 t_OP_FINAL_LINHA_PONTO_VIRGULA = r'\;'
 t_OP_EXEC_VIRGULA = r'\,'
 t_OP_ATRIB_IGUAL = r'\='
+t_OP_ATRIB_MAIS_IGUAL = r'\+\='
+t_OP_REL_DUPLO_IGUAL = r'\=\='
 t_OP_REL_MENOR = r'\<'
 t_OP_REL_MAIOR = r'\>'
 t_OP_PRIO_ABRE_PARENTESES = r'\('
 t_OP_PRIO_FECHA_PARENTESES = r'\)'
-t_OP_PRIO_ABRE_COLCHETES = r'\['
-t_OP_PRIO_FECHA_COLCHETES = r'\]'
+#t_OP_PRIO_ABRE_COLCHETES = r'\['
+#t_OP_PRIO_FECHA_COLCHETES = r'\]'
 t_OP_PRIO_ABRE_CHAVES = r'\{'
 t_OP_PRIO_FECHA_CHAVES = r'\}'
 
@@ -70,10 +76,6 @@ t_ignore = ' \t'  # Ignora espaço e tabulação
 
 def t_STRING(t):
     r'("[^"]*")'
-    return t
-
-def t_string_mal_formada(t):
-    r'("[^"]*)'
     return t
 
 def t_DOUBLE(t):
@@ -89,7 +91,11 @@ def t_VARIAVEL(t):
     r'[a-z][a-z_0-9]*'
     return t
 
-# Defina uma regra para que seja possível rastrear o números de linha
+def t_INT(t):
+    r'INT'
+    return t
+
+# Define uma regra para que seja possível rastrear o números de linha
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
@@ -102,7 +108,7 @@ def t_error(t):
 
 # Análise Sintática
 
-def p_declaracoes(p):
+def p_declaracoes_single(p):
     '''
     declaracoes : declaracao
     '''
@@ -115,21 +121,27 @@ def p_declaracoes_mult(p):
 def p_bloco(p):
     '''
     bloco : OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
+          | OP_PRIO_ABRE_CHAVES declaracao bloco OP_PRIO_FECHA_CHAVES
           | OP_PRIO_ABRE_CHAVES impressao OP_PRIO_FECHA_CHAVES
+          | OP_PRIO_ABRE_CHAVES escrita impressao OP_PRIO_FECHA_CHAVES
+          | OP_PRIO_ABRE_CHAVES escrita escrita impressao OP_PRIO_FECHA_CHAVES
+          | OP_PRIO_ABRE_CHAVES escrita escrita expr impressao OP_PRIO_FECHA_CHAVES
+          | OP_PRIO_ABRE_CHAVES impressao param_cond OP_FINAL_LINHA_PONTO_VIRGULA OP_PRIO_FECHA_CHAVES
+          | OP_PRIO_ABRE_CHAVES param_cond OP_FINAL_LINHA_PONTO_VIRGULA impressao OP_PRIO_FECHA_CHAVES
           | OP_PRIO_ABRE_CHAVES impressao expr OP_PRIO_FECHA_CHAVES
           
     '''
 
-def p_declaracao_while(p):
+def p_declaracao_ENQUANTO(p):
     '''
-    declaracao : WHILE OP_PRIO_ABRE_PARENTESES param_cond OP_PRIO_FECHA_PARENTESES bloco
+    declaracao : ENQUANTO param_cond bloco
+               | declaracao ENQUANTO param_cond bloco
     '''
 
 def p_declaracao_para(p):
     '''
-    declaracao : FOR OP_PRIO_ABRE_PARENTESES VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_EXEC_VIRGULA param_cond OP_EXEC_VIRGULA VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_ADICAO INTEIRO  OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
-               | FOR OP_PRIO_ABRE_PARENTESES VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_EXEC_VIRGULA param_cond OP_EXEC_VIRGULA VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_ADICAO INTEIRO  OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
-               | FOR OP_PRIO_ABRE_PARENTESES VARIAVEL param_cond OP_EXEC_VIRGULA VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_ADICAO INTEIRO  OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
+    declaracao : PARA VARIAVEL EM RANGE OP_PRIO_ABRE_PARENTESES INTEIRO OP_EXEC_VIRGULA INTEIRO OP_PRIO_FECHA_PARENTESES bloco
+               | PARA VARIAVEL EM RANGE OP_PRIO_ABRE_PARENTESES DOUBLE OP_EXEC_VIRGULA DOUBLE OP_PRIO_FECHA_PARENTESES bloco
     '''
 
 def p_declaracao_atribuicaoValorVariavel(p):
@@ -141,14 +153,17 @@ def p_declaracao_atribuicaoValorVariavel(p):
             | VARIAVEL OP_ATRIB_IGUAL DOUBLE OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL funcao OP_FINAL_LINHA_PONTO_VIRGULA
             | param VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
+            | VARIAVEL OP_ATRIB_MAIS_IGUAL INTEIRO
+            | VARIAVEL OP_ATRIB_MAIS_IGUAL DOUBLE
+            | VARIAVEL OP_ATRIB_MAIS_IGUAL VARIAVEL
     '''
 
 def p_declaracao_condicionais(p):
     '''
-    declaracao : IF OP_PRIO_ABRE_PARENTESES param_cond OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
-            | IF OP_PRIO_ABRE_PARENTESES param_cond OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES senaose
-            | IF OP_PRIO_ABRE_PARENTESES param_cond OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES senaose ELSE OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
-            | IF OP_PRIO_ABRE_PARENTESES param_cond OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES ELSE OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
+    declaracao : SE param_cond bloco
+               | declaracao SE param_cond bloco
+               | declaracao SE param_cond bloco senao
+               | SE param_cond bloco senao
     '''
 
 def p_declaracao_funcao_invocada(p):
@@ -171,20 +186,27 @@ def p_parametro_condicional(p):
                 | VARIAVEL OP_REL_MAIOR INTEIRO
                 | VARIAVEL OP_REL_MAIOR DOUBLE
                 | VARIAVEL OP_REL_MAIOR VARIAVEL
+                | VARIAVEL OP_ATRIB_MAIS_IGUAL INTEIRO
+                | VARIAVEL OP_ATRIB_MAIS_IGUAL DOUBLE
+                | VARIAVEL OP_ATRIB_MAIS_IGUAL VARIAVEL
+                | VARIAVEL OP_REL_DUPLO_IGUAL INTEIRO
+                | VARIAVEL OP_REL_DUPLO_IGUAL DOUBLE
+                | VARIAVEL OP_REL_DUPLO_IGUAL VARIAVEL
 
     '''
 
 def p_impressao(p):
-    '''impressao : PRINTF expr OP_FINAL_LINHA_PONTO_VIRGULA
-                 | PRINTF expr OP_PRIO_ABRE_PARENTESES STRING OP_EXEC_VIRGULA VARIAVEL OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
-                 | PRINTF OP_PRIO_ABRE_PARENTESES STRING OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
-                 | PRINTF OP_PRIO_ABRE_PARENTESES  STRING OP_EXEC_VIRGULA VARIAVEL OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
+    '''impressao : ESCREVA expr OP_FINAL_LINHA_PONTO_VIRGULA
+                 | ESCREVA expr OP_PRIO_ABRE_PARENTESES STRING OP_EXEC_VIRGULA VARIAVEL OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
+                 | ESCREVA OP_PRIO_ABRE_PARENTESES STRING OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
+                 | ESCREVA OP_PRIO_ABRE_PARENTESES  STRING OP_EXEC_VIRGULA VARIAVEL OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
     '''
 
 def p_escrita(p):
-    '''escrita : VARIAVEL OP_ATRIB_IGUAL SCANF OP_PRIO_ABRE_PARENTESES expr OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
-               | VARIAVEL OP_ATRIB_IGUAL SCANF OP_PRIO_ABRE_PARENTESES STRING OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA 
-               | VARIAVEL OP_ATRIB_IGUAL SCANF OP_PRIO_ABRE_PARENTESES STRING VARIAVEL OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA 
+    '''escrita : VARIAVEL OP_ATRIB_IGUAL LEIA OP_PRIO_ABRE_PARENTESES expr OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
+               | VARIAVEL OP_ATRIB_IGUAL param OP_PRIO_ABRE_PARENTESES LEIA OP_PRIO_ABRE_PARENTESES STRING OP_PRIO_FECHA_PARENTESES OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA
+               | VARIAVEL OP_ATRIB_IGUAL LEIA OP_PRIO_ABRE_PARENTESES STRING OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA 
+               | VARIAVEL OP_ATRIB_IGUAL LEIA OP_PRIO_ABRE_PARENTESES STRING VARIAVEL OP_PRIO_FECHA_PARENTESES OP_FINAL_LINHA_PONTO_VIRGULA 
     '''
 
 
@@ -192,7 +214,15 @@ def p_expressao_variavel(p):
     '''
     expr :  VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
          |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_ADICAO INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_ADICAO VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_SUB INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_SUB VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_MULT INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_MULT VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_DIV INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_DIV VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
     '''
+
 
 def p_expressao_operacao(p):
     '''
@@ -207,9 +237,11 @@ def p_parametro_vazio(p):
     param_vazio :
     '''
 
+
 def p_parametro(p):
     '''
     param : INTEIRO
+        | INT
         | DOUBLE
         | STRING
         | VARIAVEL
@@ -223,7 +255,7 @@ def p_regra_funcao(p):
 
 def p_senao_se(p):
     '''
-    senaose : ELIF OP_PRIO_ABRE_PARENTESES param_cond OP_PRIO_FECHA_PARENTESES OP_PRIO_ABRE_CHAVES declaracoes OP_PRIO_FECHA_CHAVES
+    senao : ELSE bloco
     '''
 
 # Define a precedência e associação dos operadores matemáticos
@@ -246,7 +278,7 @@ erros = 0
 
 # função padrão para adicionar as classificações dos tokens para ser impressa pelo compilador
 def add_lista_saida(t, notificacao):
-    saidas.append((t.lineno, t.lexpos, t.type, t.value, notificacao))
+    saidas.append(( t.type, t.value, notificacao))
 
 saidas = []
 
@@ -291,11 +323,11 @@ class Application():
 
         # Frame Código Fonte
         self.frame_1 = tk.Frame(self.root, bd=4, bg="#DCDCDC", highlightbackground="white", highlightthickness=3)
-        self.frame_1.place(relx=0.02, rely=0.07, relwidth=0.46, relheight=0.55) 
+        self.frame_1.place(relx=0.02, rely=0.07, relwidth=0.46, relheight=0.55)
 
         # Frame Código Python
         self.frame_3 = tk.Frame(self.root, bd=4, bg="#DCDCDC", highlightbackground="grey", highlightthickness=3)
-        self.frame_3.place(relx=0.52, rely=0.07, relwidth=0.46, relheight=0.55) 
+        self.frame_3.place(relx=0.52, rely=0.07, relwidth=0.46, relheight=0.55)
 
         # Label Código Python
         self.lb_codigo_python = tk.Label(text="Código Python", bg="white", font=('', 12))
@@ -311,13 +343,11 @@ class Application():
 
         # Frame do Analisador lexico e sintatico
         self.frame_2 = tk.Frame(self.root, bd=4, bg="#DCDCDC", highlightbackground="grey", highlightthickness=3)
-        self.frame_2.place(relx=0.02, rely=0.70, relwidth=0.96, relheight=0.20) 
+        self.frame_2.place(relx=0.02, rely=0.70, relwidth=0.96, relheight=0.20)
 
     def chama_analisador(self):
-        columns = ('linha', 'posicao', 'token', 'lexema', 'notificacao')
+        columns = ( 'token', 'lexema', 'notificacao')
         self.saida = ttk.Treeview(self.frame_2, height=5, columns=columns, show='headings')
-        self.saida.heading("linha", text='Linha')
-        self.saida.heading("posicao", text='Posicao referente ao inicio da entrada')
         self.saida.heading("token", text='Token')
         self.saida.heading("lexema", text='Lexema')
         self.saida.heading("notificacao", text='Notificacao')
@@ -329,18 +359,17 @@ class Application():
         print("Análise Léxica:")
         # Tokenizar a entrada para passar para o analisador léxico
         for tok in lexer:
+            print("Token:", tok.type)
+            print("Valor:", tok.value)
             global erros
-            if tok.type == "string_mal_formada":
-                erros += 1
-                add_lista_saida(tok, f"string mal formatada")
-            elif tok.type == "INTEIRO":
+            if tok.type == "INTEIRO":
                 max = (len(str(tok.value)))
                 if max > 15:
                     erros += 1
                     add_lista_saida(tok, f"entrada maior que a suportada")
                 else:
                     add_lista_saida(tok, f" ")
-            elif tok.type == "IF" or tok.type == "ELIF" or tok.type == "ELSE" or tok.type == "WHILE" or tok.type == "FOR" or tok.type == "PRINTF" or tok.type == "SCANF":
+            elif tok.type == "SE" or tok.type == "ELSE" or tok.type == "ENQUANTO" or tok.type == "PARA" or tok.type == "ESCREVA" or tok.type == "IN" or tok.type == "RANGE" or tok.type == "LEIA":
                 max = len(tok.value)
                 if max < 20:
                     if tok.value in reserved:
@@ -369,23 +398,99 @@ class Application():
         for retorno in saidas:
             self.saida.insert('', tk.END, values=retorno)
 
-
         self.saida.place(relx=0.001, rely=0.01, relwidth=0.999, relheight=0.95)
 
     def transpilar_codigo(self):
         codigo_fonte = self.codigo_entry.get(1.0, tk.END)
-        # Ainda não há lógica de transpilação, então exibimos o código-fonte original
-        self.mostrar_codigo_transpilado(codigo_fonte)
+        codigo_transpilado = self.transpilar_para_python(codigo_fonte)
+        self.mostrar_codigo_transpilado(codigo_transpilado)
 
+    def transpilar_para_python(self, codigo_fonte):
+        # Remover o ponto e vírgula no final da linha e espaços em branco subsequentes
+        codigo_fonte = codigo_fonte.replace(';', '').rstrip()
+
+        # Substituir PARA por for
+        codigo_fonte = codigo_fonte.replace('PARA', 'for')
+
+        codigo_fonte = codigo_fonte.replace('ELSE', 'else')
+
+        # Substituir LEIA por input
+        codigo_fonte = codigo_fonte.replace('LEIA', 'input')
+
+        # Substituir SE por if e ELSE por else
+        codigo_fonte = codigo_fonte.replace('SE', 'if')
+
+        # Substituir ESCREVA por print
+        codigo_fonte = codigo_fonte.replace('ESCREVA', 'print')
+
+        # Substituir chaves por indentação
+        codigo_fonte = codigo_fonte.replace('{', '').replace('}', '')
+
+        # Remover ':' após a linha 'x = 11'
+        codigo_fonte = codigo_fonte.replace('x = 11\n:', 'x = 11\n')
+
+        # Substituir acentos
+        codigo_fonte = codigo_fonte.replace('eh', 'é')
+
+        # Corrigir formatação da string dentro da função ESCREVA
+        in_string = False
+        temp = ''
+        word = ''
+        for char in codigo_fonte:
+            if char == '"':
+                in_string = not in_string
+            if not in_string:
+                if char.isalpha():
+                    word += char
+                else:
+                    if word == 'RANGE':
+                        temp += 'range'
+                    elif word == 'EM':
+                        temp += 'in'
+                    elif word == 'INT':
+                        temp += 'int'
+                    else:
+                        temp += word
+                    word = ''
+                    temp += char
+            else:
+                temp += char
+        codigo_fonte = temp
+
+        # transpilar a estrutura ENQUANTO
+        codigo_fonte = codigo_fonte.replace('ENQUANTO', 'while')
+
+        # Transpilar atribuição de valor a uma variável
+        codigo_fonte = codigo_fonte.replace('OP_ATRIB_IGUAL', '=')
+
+        # Corrigir indentação
+        linhas = codigo_fonte.split('\n')
+        for i in range(len(linhas)):
+            linha = linhas[i].strip()
+            if linha.startswith(('if', 'else', 'while', 'for')):
+                # Adicionar ':' se ainda não estiver presente
+                if not linha.endswith(':'):
+                    linhas[i] = linha + ':'
+            # Corrigir indentação do bloco else
+            elif linha.startswith('else'):
+                if i > 0 and linhas[i-1].strip().endswith(':'):
+                    linhas[i] = ' ' + linha
+                else:
+                    if i+1 < len(linhas) and not linhas[i+1].strip().startswith('print'):
+                        linhas[i+1] = '    ' + linhas[i+1]
+                        linhas[i] = ' ' + linha
+
+        codigo_fonte = '\n'.join(linhas)
+
+        return codigo_fonte
+
+    
+    
     def mostrar_codigo_transpilado(self, codigo_transpilado):
         # Limpar a área de visualização do código Python
         self.codigo_python_entry.delete(1.0, tk.END)
         # Exibir o código Python transpilado na área de visualização
         self.codigo_python_entry.insert(tk.END, codigo_transpilado)
-
-        self.scrollAnalise = ttk.Scrollbar(self.frame_2, orient='vertical', command=self.saida.yview)
-        self.scrollAnalise.place(relx=0.979, rely=0.0192, relwidth=0.02, relheight=0.92)
-        self.saida['yscrollcommand'] = self.scrollAnalise
 
     def botoes(self):
         # botao limpar

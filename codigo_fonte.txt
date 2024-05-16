@@ -1,14 +1,8 @@
-programa
-inteiro num1, num2, soma;
-decimal media;
+x = 11;
 {
-    escreva("Digite o primeiro número: ");
-    leia(num1);
-    escreva("Digite o segundo número: ");
-    leia(num2);
-    soma := num1 + num2;
-    media := soma / 2;
-    escreva("A média é: ");
-    escreva(media);
+    IF x > 10{
+	PRINTF ("x eh maior que 10");
+}ELSE{
+    PRINTF ("x eh menor que 10");
 }
-fimprog;
+}

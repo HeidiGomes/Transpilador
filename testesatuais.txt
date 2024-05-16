@@ -1,13 +1,56 @@
-PRINTF("O valor de x eh: ", x);
+ESCREVA("O valor de x eh: ", x);
 
+##########################################
 x = 10;
+
+##########################################
 
 x = 10;
 {
-    PRINTF("O valor de x eh: ", x);
+ESCREVA("O valor de x eh: ", x);
 }
 
-WHILE (x < 10) {
-    PRINTF("O valor de x eh: ", x);
-    x = x + 1;
+##########################################
+
+x = 0;
+ENQUANTO x < 10 {
+    ESCREVA("O valor de x eh: ", x);
+    x += 1;
 }
+
+##########################################
+
+x = 10;
+{
+x = INT(LEIA("primeira nota: "));
+s = INT(LEIA("segunda nota: "));
+soma = x + s;
+ESCREVA("O valor de soma eh: ", soma);
+}
+
+
+##########################################
+
+
+##########################################
+
+PARA x EM RANGE(1, 10){
+	x += 1;
+	ESCREVA("O valor de x eh: ", x);	
+}
+
+##########################################
+
+x = 11;
+SE x > 10{
+    ESCREVA ("x eh maior que 10");
+         }
+
+##########################################
+
+x = 11;
+SE x > 10{
+	ESCREVA ("x eh maior que 10");
+}ELSE{
+    ESCREVA ("x eh menor que 10");
+      }
