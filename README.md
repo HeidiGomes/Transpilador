@@ -71,6 +71,12 @@ A função principal do programa inicializa o lexer, o parser e a interface grá
    ``` parser = yacc.yacc() ```
    ``` root.mainloop() ```
 
+### Dificuldades
+Desenvolver o transpilador apresentou desafios em várias frentes. Foi necessário criar regras precisas para análise léxica e sintática (o que demandou muita atenção e tempo). 
+Garantir uma transpilação confiável do código para Python. 
+Integrar uma interface gráfica amigável. 
+Gerenciar erros de forma eficiente e realizar testes abrangentes para depurar o código.
+
 ## Para instalar as dependências, execute:
 Abra o terminal VSCODE e digite:  
 
