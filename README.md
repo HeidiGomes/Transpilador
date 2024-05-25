@@ -72,4 +72,37 @@ A função principal do programa inicializa o lexer, o parser e a interface grá
    ``` root.mainloop() ```
 
 ## Para instalar as dependências, execute:
-Abra o terminal VSCODE e digite:  pip install ply
+Abra o terminal VSCODE e digite:  
+
+```pip install ply```
+
+## Como Rodar os Testes
+Para rodar os testes, siga os passos abaixo:
+
+1- Certifique-se de que todas as dependências estão instaladas.
+2- Execute o script principal main.py:
+ ```python main.py```
+
+Aparecerá o transpilador, como na imagem abaixo.
+![Logo da Empresa](imagens/transpilador.png)
+Para testar siga as instruções.
+3- Copie um dos exemplos de código fonte no arquivo testesatuais.txt
+4- Cole na "telinha" Código Fonte
+![Logo da Empresa](imagens/codigofonte.png)
+5- Clique em transpilar
+
+obs:  
+* Caso tenha feito um teste e queira efetuar um novo teste com um novo código fonte, clique em "Limpar" e cole o novo código fonte na "telinha" Código Fonte
+* Você tem a opção de salvar o código transpilado clicando em "Menu" e depois em "Salvar"
+![Logo da Empresa](imagens/salvar.png)
+
+
+
+## Integrantes do grupo
+
+| Nome                                   | RA         |
+|----------------------------------------|------------|
+| Heidielton Carmo de Brito              | 1272022645 |
+| Paulo Sérgio Moraes de Oliveira Filho  | 1272022847 |
+| Vitor Gabriel Teixeira da Guarda Silva | 21272018696|
+| Alfredo Victor do Nascimento Souza Sena|            |
