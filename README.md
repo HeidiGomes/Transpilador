@@ -79,17 +79,35 @@ Abra o terminal VSCODE e digite:
 ## Como Rodar os Testes
 Para rodar os testes, siga os passos abaixo:
 
-1- Certifique-se de que todas as dependências estão instaladas.
-2- Execute o script principal main.py:
- ```python main.py```
+* **1- Certifique-se de que todas as dependências estão instaladas.**
+
+
+* **2- Execute o script principal main.py:**
+ ```python main.py``` 
 
 Aparecerá o transpilador, como na imagem abaixo.
+
+
 ![Logo da Empresa](imagens/transpilador.png)
+
+
 Para testar siga as instruções.
-3- Copie um dos exemplos de código fonte no arquivo testesatuais.txt
-4- Cole na "telinha" Código Fonte
+
+
+* **3- Copie um dos exemplos de código fonte no arquivo testesatuais.txt**
+
+
+* **4- Cole na "telinha" Código Fonte**
+
+
 ![Logo da Empresa](imagens/codigofonte.png)
-5- Clique em transpilar
+
+
+* **5- Clique em transpilar**
+
+
+![Logo da Empresa](imagens/bttranspilar.png)
+
 
 obs:  
 * Caso tenha feito um teste e queira efetuar um novo teste com um novo código fonte, clique em "Limpar" e cole o novo código fonte na "telinha" Código Fonte
