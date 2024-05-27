@@ -120,6 +120,14 @@ obs:
 * Você tem a opção de salvar o código transpilado clicando em "Menu" e depois em "Salvar"
 ![Logo da Empresa](imagens/salvar.png)
 
+## Implementações futuras
+Estou trabalhando numa versão 2 do transpilador, onde terá um visual mais moderno e apresentavel. Atualmente existem dois modelos, white e o dark. Estou implementando uma funcionalidade para que o usuário alterne entre ambos os modelos(Os modelos estão funcionando, porém, como arquivos distintos).
+
+**VERSÃO WHITE**
+![Logo da Empresa](imagens/v2white.png)
+
+**VERSÃO DARK**
+![Logo da Empresa](imagens/v2dark.png)
 
 
 ## Integrantes do grupo
