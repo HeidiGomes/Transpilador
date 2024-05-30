@@ -3,6 +3,7 @@ from ply import yacc
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from tkinter import filedialog
 
 # Análise Léxica
@@ -22,6 +23,7 @@ tokens = [
     'DOUBLE',
     'STRING',
     'INT',
+    'FLOAT',
     'VARIAVEL',
     'OP_MAT_ADICAO',
     'OP_MAT_SUB',
@@ -97,6 +99,10 @@ def t_INT(t):
     r'INT'
     return t
 
+def t_FLOAT(t):
+    r'FLOAT'
+    return t
+
 # Define uma regra para que seja possível rastrear o números de linha
 def t_newline(t):
     r'\n+'
@@ -118,6 +124,7 @@ def p_declaracoes_single(p):
 def p_declaracoes_mult(p):
     '''
     declaracoes :  declaracao bloco
+                |  bloco
     '''
 
 def p_bloco(p):
@@ -152,6 +159,7 @@ def p_declaracao_atribuicaoValorVariavel(p):
             | VARIAVEL OP_ATRIB_IGUAL STRING OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
+            | VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL DOUBLE OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL funcao OP_FINAL_LINHA_PONTO_VIRGULA
             | param VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
@@ -247,6 +255,7 @@ def p_parametro(p):
     '''
     param : INTEIRO
         | INT
+        | FLOAT
         | DOUBLE
         | STRING
         | VARIAVEL
@@ -411,9 +420,17 @@ class Application():
         self.saida.place(relx=0.001, rely=0.01, relwidth=0.97, relheight=0.95)
 
     def transpilar_codigo(self):
+        # Obtém o código-fonte do widget de entrada
         codigo_fonte = self.codigo_entry.get(1.0, tk.END)
-        codigo_transpilado = self.transpilar_para_python(codigo_fonte)
-        self.mostrar_codigo_transpilado(codigo_transpilado)
+
+        # Verifica se há erros léxicos ou sintáticos antes de transpilar
+        if not erroslexicos and not errossintaticos:
+            # Se não houver erros, transpila o código
+            codigo_transpilado = self.transpilar_para_python(codigo_fonte)
+            self.mostrar_codigo_transpilado(codigo_transpilado)
+        else:
+            # Se houver erros, mostra uma mensagem ao usuário ou trata-os de acordo com a sua lógica
+            messagebox.showerror("Erro", "Há erros léxicos ou sintáticos no código. Corrija-os antes de transpilar.")
 
     def transpilar_para_python(self, codigo_fonte):
         # Remover o ponto e vírgula no final da linha e espaços em branco subsequentes
@@ -459,6 +476,8 @@ class Application():
                         temp += 'in'
                     elif word == 'INT':
                         temp += 'int'
+                    elif word == 'FLOAT':
+                        temp += 'float'
                     else:
                         temp += word
                     word = ''

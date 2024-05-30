@@ -3,6 +3,7 @@ from ply import yacc
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from tkinter import filedialog
 
 # Análise Léxica
@@ -22,10 +23,12 @@ tokens = [
     'DOUBLE',
     'STRING',
     'INT',
+    'FLOAT',
     'VARIAVEL',
     'OP_MAT_ADICAO',
     'OP_MAT_SUB',
     'OP_MAT_MULT',
+    'OP_MAT_POT',
     'OP_MAT_DIV',
     'OP_EXEC_VIRGULA',
     'OP_ATRIB_IGUAL',
@@ -54,6 +57,7 @@ t_RANGE = r'RANGE'
 t_OP_MAT_ADICAO = r'\+'
 t_OP_MAT_SUB = r'-'
 t_OP_MAT_MULT = r'\*'
+t_OP_MAT_POT = r'\*\*'
 t_OP_MAT_DIV = r'/'
 t_OP_FINAL_LINHA_PONTO_VIRGULA = r'\;'
 t_OP_EXEC_VIRGULA = r'\,'
@@ -95,6 +99,10 @@ def t_INT(t):
     r'INT'
     return t
 
+def t_FLOAT(t):
+    r'FLOAT'
+    return t
+
 # Define uma regra para que seja possível rastrear o números de linha
 def t_newline(t):
     r'\n+'
@@ -116,6 +124,7 @@ def p_declaracoes_single(p):
 def p_declaracoes_mult(p):
     '''
     declaracoes :  declaracao bloco
+                |  bloco
     '''
 
 def p_bloco(p):
@@ -150,6 +159,7 @@ def p_declaracao_atribuicaoValorVariavel(p):
             | VARIAVEL OP_ATRIB_IGUAL STRING OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
+            | VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL DOUBLE OP_FINAL_LINHA_PONTO_VIRGULA
             | VARIAVEL OP_ATRIB_IGUAL funcao OP_FINAL_LINHA_PONTO_VIRGULA
             | param VARIAVEL OP_ATRIB_IGUAL INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
@@ -221,6 +231,8 @@ def p_expressao_variavel(p):
          |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_MULT VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
          |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_DIV INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
          |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_DIV VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_POT INTEIRO OP_FINAL_LINHA_PONTO_VIRGULA
+         |  VARIAVEL OP_ATRIB_IGUAL VARIAVEL OP_MAT_POT VARIAVEL OP_FINAL_LINHA_PONTO_VIRGULA
     '''
 
 
@@ -230,6 +242,7 @@ def p_expressao_operacao(p):
         |  expr OP_MAT_SUB expr
         |  expr OP_MAT_MULT expr
         |  expr OP_MAT_DIV expr
+        |  expr OP_MAT_POT expr
     '''
 
 def p_parametro_vazio(p):
@@ -242,6 +255,7 @@ def p_parametro(p):
     '''
     param : INTEIRO
         | INT
+        | FLOAT
         | DOUBLE
         | STRING
         | VARIAVEL
@@ -261,7 +275,7 @@ def p_senao_se(p):
 # Define a precedência e associação dos operadores matemáticos
 precedence = (
     ('left', 'OP_MAT_ADICAO', 'OP_MAT_SUB'),
-    ('left', 'OP_MAT_MULT', 'OP_MAT_DIV'),
+    ('left', 'OP_MAT_MULT', 'OP_MAT_DIV','OP_MAT_POT'),
 )
 
 errossintaticos = []
@@ -346,11 +360,16 @@ class Application():
         self.frame_2.place(relx=0.02, rely=0.70, relwidth=0.96, relheight=0.20)
 
     def chama_analisador(self):
-        columns = ( 'token', 'lexema', 'notificacao')
+        columns = ('token', 'lexema', 'notificacao')
         self.saida = ttk.Treeview(self.frame_2, height=5, columns=columns, show='headings')
         self.saida.heading("token", text='Token')
         self.saida.heading("lexema", text='Lexema')
         self.saida.heading("notificacao", text='Notificacao')
+
+        # Adicionar barra de rolagem vertical
+        scrollbar = ttk.Scrollbar(self.frame_2, orient='vertical', command=self.saida.yview)
+        scrollbar.place(relx=0.975, rely=0, relheight=0.96)
+        self.saida.configure(yscrollcommand=scrollbar.set)
 
         data = self.codigo_entry.get(1.0, "end-1c")
         lexer = lex.lex()
@@ -385,25 +404,33 @@ class Application():
 
         tamerroslex = len(erroslexicos)
         if tamerroslex == 0 and erros == 0:
-            print("Análise Léxica Concluída sem Erros")
+            self.saida.insert('', tk.END, values="Análise Léxica Concluída sem Erros")
             parser.parse(data)
             tamerrosin = len(errossintaticos)
             if tamerrosin == 0:
-                print("Análise Sintática Concluída sem Erros")
+                self.saida.insert('', tk.END, values="Análise Sintática Concluída sem Erros")
             else:
-                print("Erro Sintático")
+                self.saida.insert('', tk.END, values="Erro Sintático")
         else:
-            print("Erro Léxico")
+            self.saida.insert('', tk.END, values="Erro Léxico")
 
         for retorno in saidas:
             self.saida.insert('', tk.END, values=retorno)
 
-        self.saida.place(relx=0.001, rely=0.01, relwidth=0.999, relheight=0.95)
+        self.saida.place(relx=0.001, rely=0.01, relwidth=0.97, relheight=0.95)
 
     def transpilar_codigo(self):
+        # Obtém o código-fonte do widget de entrada
         codigo_fonte = self.codigo_entry.get(1.0, tk.END)
-        codigo_transpilado = self.transpilar_para_python(codigo_fonte)
-        self.mostrar_codigo_transpilado(codigo_transpilado)
+
+        # Verifica se há erros léxicos ou sintáticos antes de transpilar
+        if not erroslexicos and not errossintaticos:
+            # Se não houver erros, transpila o código
+            codigo_transpilado = self.transpilar_para_python(codigo_fonte)
+            self.mostrar_codigo_transpilado(codigo_transpilado)
+        else:
+            # Se houver erros, mostra uma mensagem ao usuário ou trata-os de acordo com a sua lógica
+            messagebox.showerror("Erro", "Há erros léxicos ou sintáticos no código. Corrija-os antes de transpilar.")
 
     def transpilar_para_python(self, codigo_fonte):
         # Remover o ponto e vírgula no final da linha e espaços em branco subsequentes
@@ -449,6 +476,8 @@ class Application():
                         temp += 'in'
                     elif word == 'INT':
                         temp += 'int'
+                    elif word == 'FLOAT':
+                        temp += 'float'
                     else:
                         temp += word
                     word = ''
@@ -508,6 +537,7 @@ class Application():
         self.scroll_bar.place(relx=0.982, rely=0.0019, relwidth=0.015, relheight=0.99)
         self.codigo_entry['yscrollcommand'] = self.scroll_bar
 
+
     def Menus(self):
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
@@ -528,7 +558,7 @@ class Application():
 
         def onSave():
             files = filedialog.asksaveasfile(mode='w', defaultextension=".txt")
-            t = self.codigo_entry.get(0.0, tk.END)
+            t = self.codigo_python_entry.get(1.0, tk.END)
             files.write(t.rstrip())
 
         menubar.add_cascade(label="Menu", menu=filemenu,)
