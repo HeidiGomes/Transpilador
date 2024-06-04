@@ -1,8 +1,6 @@
-x = 11;
-{
-    IF x > 10{
-	PRINTF ("x eh maior que 10");
+x = 9;
+SE x > 10{
+	ESCREVA ("x eh maior que 10");
 }ELSE{
-    PRINTF ("x eh menor que 10");
-}
-}
+    ESCREVA ("x eh menor que 10");
+      }
