@@ -46,8 +46,26 @@ O objetivo deste projeto é criar um transpilador capaz de ler uma linguagem inv
 - PLY (Python Lex-Yacc): Utilizado para análise léxica e sintática.
 - Tkinter: Utilizado para a interface gráfica do usuário.
 
+## Arquivos
+- imagens (Contendo as imagens utilizadas na documentação)
+- codigo_fonte.txt (Esse arquivo é usado como uma das duas opções para lê o código fonte.)
+- parsetab.py e parser.out (Arquivos gerados automaticamente pela biblioteca PLY)
+- testesatuais.txt (São exemplos de código fontes funcionais para o transpilador)
+- Transpilador.pdf (Arquivo em pdf com explicação detalhada do código)
+
 ## Por que Utilizar o PLY?
 PLY é uma implementação em Python das ferramentas Lex e Yacc, que são amplamente utilizadas para a análise léxica e sintática. Ele foi escolhido devido à sua simplicidade e robustez, permitindo criar compiladores e transpiladores de forma eficiente.
+
+Quando utilizamos a biblioteca PLY (Python Lex-Yacc), ela cria os arquivos parser.out e parsetab.py por padrão.
+
+### parser.out:
+- Ele contém informações detalhadas sobre a análise sintática gerada a partir das regras da sua gramática.
+- Esse arquivo é útil para depurar problemas relacionados à análise sintática do seu código.
+
+### parsetab.py:
+
+- O arquivo parsetab.py contém tabelas geradas pelo yacc (analisador sintático) para otimizar o processo de análise.
+- Essas tabelas são usadas para acelerar a análise sintática e evitar a necessidade de recriar as tabelas a cada execução.
 
 ## Explicação de Partes Importantes do Código
 ### Análise Léxica
@@ -138,3 +156,4 @@ Estou trabalhando numa versão 2 do transpilador, onde terá um visual mais mode
 | Paulo Sérgio Moraes de Oliveira Filho  | 1272022847 |
 | Vitor Gabriel Teixeira da Guarda Silva | 21272018696|
 | Alfredo Victor do Nascimento Souza Sena|            |
+| Enzo Matos Oliveira                    |            |
