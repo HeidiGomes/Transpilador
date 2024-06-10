@@ -154,6 +154,6 @@ Estou trabalhando numa versão 2 do transpilador, onde terá um visual mais mode
 |----------------------------------------|------------|
 | Heidielton Carmo de Brito              | 1272022645 |
 | Paulo Sérgio Moraes de Oliveira Filho  | 1272022847 |
-| Vitor Gabriel Teixeira da Guarda Silva | 21272018696|
+| Vitor Gabriel Teixeira da Guarda Silva | 1272018696 |
 | Alfredo Victor do Nascimento Souza Sena|            |
 | Enzo Matos Oliveira                    |            |
