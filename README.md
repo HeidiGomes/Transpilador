@@ -146,14 +146,3 @@ Estou trabalhando numa versão 2 do transpilador, onde terá um visual mais mode
 
 **VERSÃO DARK**
 ![Logo da Empresa](imagens/v2dark.png)
-
-
-## Integrantes do grupo
-
-| Nome                                   | RA         |
-|----------------------------------------|------------|
-| Heidielton Carmo de Brito              | 1272022645 |
-| Paulo Sérgio Moraes de Oliveira Filho  | 1272022847 |
-| Vitor Gabriel Teixeira da Guarda Silva | 1272018696 |
-| Alfredo Victor do Nascimento Souza Sena|            |
-| Enzo Matos Oliveira                    |            |
